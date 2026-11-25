@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CEDIS Flow · De la Orden de Compra al Embarque</title>
+<style>
+:root{--bg:#e8ebef;--cd:#fff;--tx:#14202b;--mu:#566372;--bd:#cfd6de;--ac:#0b5fa5;--ok:#1b7f45;--wr:#a86400;--er:#b3261e;--hi:#fff3cf;--okbg:#e6f4ec;--erbg:#fdecea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#10161d;--cd:#19212b;--tx:#e6ebf1;--mu:#93a1b1;--bd:#2b3643;--ac:#5aaaf0;--ok:#4cc17f;--wr:#e5b04f;--er:#ef7b6e;--hi:#3a3118;--okbg:#163022;--erbg:#381c1a}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#10161d;--cd:#19212b;--tx:#e6ebf1;--mu:#93a1b1;--bd:#2b3643;--ac:#5aaaf0;--ok:#4cc17f;--wr:#e5b04f;--er:#ef7b6e;--hi:#3a3118;--okbg:#163022;--erbg:#381c1a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{padding:18px 20px 0;max-width:1140px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-size:24px;margin:0 0 2px}h2{font-size:17px;margin:0 0 10px}h3{font-size:15px;margin:0 0 8px}p.s{color:var(--mu);margin:0 0 12px;font-size:13.5px}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--okbg);color:var(--ok);border:1px solid var(--ok);vertical-align:middle;margin-left:6px}
+nav{display:flex;gap:4px;flex-wrap:wrap;max-width:1140px;margin:12px auto 0;padding:0 20px;border-bottom:2px solid var(--bd)}
+nav button{background:none;border:0;padding:10px 14px;font-weight:600;font-size:14px;font-family:inherit;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+nav button.on{color:var(--ac);border-color:var(--ac)}
+main{max-width:1140px;margin:auto;padding:16px 20px 44px}
+.pn{display:none}.pn.on{display:block}
+.cd{background:var(--cd);border:1px solid var(--bd);border-radius:6px;padding:15px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:3px}
+label.chk{flex-direction:row;align-items:center;gap:6px;color:var(--tx);font-size:13px;cursor:pointer}
+input,select{font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg);color:var(--tx);min-width:0}
+input[type=number]{width:92px}
+button.b{font-weight:600;font-size:13.5px;font-family:inherit;background:var(--ac);color:#fff;border:0;border-radius:4px;padding:8px 13px;cursor:pointer}
+button.b.g{background:none;color:var(--ac);border:1px solid var(--ac)}
+button.b.sm{padding:5px 9px;font-size:12px}
+button.b:disabled{opacity:.4;cursor:not-allowed}
+.msg{margin-top:8px;font-weight:600;font-size:13.5px}.er{color:var(--er)}.ok{color:var(--ok)}.wr{color:var(--wr)}
+.box-ok{background:var(--okbg);border:1px solid var(--ok);padding:9px 12px;border-radius:4px;margin-top:8px}
+.box-er{background:var(--erbg);border:1px solid var(--er);padding:9px 12px;border-radius:4px;margin-top:8px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--mu);font-weight:600}
+td.n,th.n{text-align:right}
+.gr{display:grid;grid-template-columns:76px repeat(10,minmax(56px,1fr));gap:2px;font-size:11px;min-width:660px}
+.gr div{padding:6px 3px;text-align:center;background:var(--bg);border-radius:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gr .o{background:var(--ac);color:#fff;font-weight:600}.gr .o.in{background:var(--ok)}.gr .h{background:none;color:var(--mu);font-weight:600}
+.lb{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.lbl{border:2px dashed var(--bd);border-radius:4px;padding:8px;display:flex;gap:10px;align-items:center;font-size:11.5px;line-height:1.35}
+.lbl .q{background:#fff;padding:4px;flex:none;border-radius:2px;line-height:0}
+.bar{height:9px;background:var(--bg);border-radius:5px;overflow:hidden;min-width:86px;display:inline-block;vertical-align:middle;margin-right:6px}.bar i{display:block;height:100%;background:var(--wr)}.bar i.f{background:var(--ok)}
+.kp{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.kp div{flex:1;min-width:145px;background:var(--hi);border-radius:4px;padding:8px 11px}.kp b{display:block;font-size:19px}
+.racks{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px;margin-top:8px}
+.rk{border:1px solid var(--bd);border-radius:4px;padding:4px;text-align:center;font-size:11px;background:var(--bg)}
+.rk.has{border-color:var(--ac);font-weight:600}.rk.rdy{background:var(--okbg);border-color:var(--ok)}.rk.ov{background:var(--erbg);border-color:var(--er);color:var(--er)}
+#log{max-height:250px;overflow:auto;font-size:13px}#log div{padding:4px 0;border-bottom:1px solid var(--bd)}
+#rel{background:#fff;color:#000;border:2px solid #000;padding:16px;margin-top:12px}#rel table{color:#000}#rel th,#rel td{border-color:#999}
+#pl{display:none}
+.cam{margin-top:10px;display:none;align-items:center;gap:10px;flex-wrap:wrap}.cam video{width:240px;height:160px;background:#000;border-radius:4px;object-fit:cover}
+@media print{
+  body *{visibility:hidden}
+  body.pt-rel #rel,body.pt-rel #rel *,body.pt-lb #pl,body.pt-lb #pl *{visibility:visible}
+  body.pt-rel #rel,body.pt-lb #pl{position:absolute;left:0;top:0;width:100%;border:0}
+  body.pt-lb #pl{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:#fff;color:#000}
+  #pl .lbl{border-color:#000;break-inside:avoid;font-size:12px}
+}
+</style></head><body>
+<header>
+  <div class="top">
+    <div>
+      <h1>CEDIS Flow <span class="badge">v4.0 Offline</span></h1>
+      <p class="s">De la Orden de Compra al embarque · Bodega 100×40 m (alt. 9 m, racks 6 m) · 4 andenes recibo · 3 andenes embarque · 32 sucursales</p>
+    </div>
+    <div class="row">
+      <button class="b g" onclick="seed()">Cargar escenario demo</button>
+      <button class="b g" onclick="resetAll()">Reiniciar datos</button>
+    </div>
+  </div>
+</header>
+<nav id="nv"></nav>
+<main>
+<!-- PESTAÑA 0: AGENDAR Y FILTRO DE CASETA -->
+<section class="pn" id="p0">
+  <div class="cd">
+    <h2>1. Agendar entrega de proveedor</h2>
+    <p class="s">Regla 1 y 2: horario corrido de 8:00 a 18:00 (lunes a sábado). Descarga mínima de 1 h completa sin empalmes por andén. Folio de factura único.</p>
+    <div class="row">
+      <label>Proveedor<input id="a-p" placeholder="Ej. Distribuidora Golfo"></label>
+      <label>Orden de compra<input id="a-o" placeholder="OC-1005"></label>
+      <label>Folio de factura<input id="a-f" placeholder="F-2005"></label>
+      <label>Andén recibo<select id="a-a"></select></label>
+      <label>Hora inicio<select id="a-i"></select></label>
+      <label>Duración (h)<input id="a-d" type="number" min="1" max="10" value="1"></label>
+      <button class="b" onclick="uiCita()">Agendar cita</button>
+    </div>
+    <div id="a-m" class="msg"></div>
+  </div>
+
+  <div class="cd">
+    <h2>2. Control de acceso en caseta (filtro contra llegadas desordenadas)</h2>
+    <p class="s">Valida que la unidad cuente con cita vigente por OC o folio de factura en la ventana horaria antes de ingresar al patio sur.</p>
+    <div class="row">
+      <label>OC o Folio de factura<input id="g-o" placeholder="Ej. OC-1001 o F-2001"></label>
+      <label>Hora actual de llegada<select id="g-h"></select></label>
+      <button class="b" onclick="uiGate()">Verificar acceso</button>
+      <button class="b g" onclick="demoSinCita()">Simular unidad sin cita</button>
+    </div>
+    <div id="g-m"></div>
+  </div>
+
+  <div class="cd">
+    <h2>Ocupación de andenes de recibo (4 andenes × 10 h = 40 h/día)</h2>
+    <div class="kp" id="a-k"></div>
+    <div class="tw"><div class="gr" id="a-g"></div></div>
+    <p class="s" style="margin-top:8px">Azul: cita agendada · Verde: unidad validada en caseta y posicionada en andén de recibo.</p>
+  </div>
+</section>
+
+<!-- PESTAÑA 1: FACTURA Y ETIQUETAS QR -->
+<section class="pn" id="p1">
+  <div class="cd">
+    <h2>Desglose de factura por bulto y generación de etiquetas QR</h2>
+    <p class="s">Regla 3 y 4: cada bulto contiene un único producto (sin mezclas) y lleva su etiqueta QR individual (máx. 1,000 kg y 1.91 m³ por tarima/bulto).</p>
+    <div class="row">
+      <label>OC<select id="b-o" onchange="rBul()"></select></label>
+      <label>SKU<input id="b-s" value="SKU-100"></label>
+      <label>Producto<input id="b-r" value="Aceite 1 L"></label>
+      <label>Sucursal (1-32)<input id="b-u" type="number" min="1" max="32" value="1"></label>
+      <label>Piezas/bulto<input id="b-n" type="number" min="1" value="12"></label>
+      <label>Peso kg/bulto<input id="b-k" type="number" min="0.1" step="0.1" value="14"></label>
+      <label>Vol. m³/bulto<input id="b-v" type="number" min="0.01" step="0.01" value="0.12"></label>
+      <label>Cant. bultos<input id="b-q" type="number" min="1" max="200" value="1"></label>
+      <button class="b" onclick="uiBul()">Agregar bulto(s)</button>
+      <button class="b g" onclick="printLabels()">Imprimir etiquetas de la OC</button>
+    </div>
+    <div id="b-m" class="msg"></div>
+    <div id="b-t" class="s" style="margin-top:10px;font-weight:600"></div>
+    <div class="lb" id="b-l"></div>
+  </div>
+</section>
+
+<!-- PESTAÑA 2: RECEPCIÓN EN ANDÉN -->
+<section class="pn" id="p2">
+  <div class="cd">
+    <h2>Recepción y validación por escaneo QR en andén</h2>
+    <p class="s">Regla 5: se escanea cada bulto; mercancía no solicitada, excedente o con discrepancia de factura se rechaza en tiempo real.</p>
+    <div class="row">
+      <label>OC en descarga<select id="r-o" onchange="rRec()"></select></label>
+      <label style="flex:1;min-width:230px">Lectura de terminal portátil (o pega contenido del QR)
+        <input id="r-i" placeholder='Ej. {"b":"B-OC-1001-0001",...}' onkeydown="if(event.key==='Enter')uiScan()">
+      </label>
+      <button class="b" onclick="uiScan()">Validar QR</button>
+      <button class="b g" onclick="toggleCam()">Cámara</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="b g sm" onclick="demoScan()">Simular escaneo válido</button>
+      <button class="b g sm" onclick="demoExcedente()">Simular excedente (duplicado)</button>
+      <button class="b g sm" onclick="demoIntruso()">Simular bulto no solicitado</button>
+      <button class="b g sm" onclick="recTodo()">Recibir todos los pendientes de la OC</button>
+    </div>
+    <div class="cam" id="cam-box">
+      <video id="cam-v" playsinline muted></video>
+      <div><div id="cam-s" class="s">Apunta la cámara al código QR de la etiqueta.</div><button class="b g sm" onclick="stopCam()">Cerrar cámara</button></div>
+    </div>
+    <div class="kp" id="r-k" style="margin-top:12px"></div>
+    <div id="log"></div>
+  </div>
+</section>
+
+<!-- PESTAÑA 3: ALMACENAMIENTO Y EMBARQUE -->
+<section class="pn" id="p3">
+  <div class="cd">
+    <h2>Mapa de ocupación de racks por sucursal (32 racks × 32 tarimas = 1,024 posiciones)</h2>
+    <p class="s">Cada rack tiene 4 niveles × 8 tarimas = 32 tarimas (1.12 × 1.15 m, altura máx. 1.85 m). Verde: listo para tortón (≥ 90 %). Rojo: rack excedido.</p>
+    <div class="racks" id="rk-grid"></div>
+  </div>
+
+  <div class="cd">
+    <h2>Consolidación y despacho de embarques (Tortón: 12 tarimas / 12 t / 22.9 m³)</h2>
+    <p class="s">Reglas 6, 7 y 8: verifica estiba y emplaye con film, cubre ≥ 90 % de capacidad (factor limitante peso/volumen) y genera la Relación de Embarque con QR en uno de los 3 andenes norte.</p>
+    <div class="row" style="margin-bottom:10px">
+      <label>Andén de embarque asignado (zona norte)
+        <select id="e-and">
+          <option value="1">Andén de salida 1</option>
+          <option value="2">Andén de salida 2</option>
+          <option value="3">Andén de salida 3</option>
+        </select>
+      </label>
+    </div>
+    <div class="tw"><table id="e-t"></table></div>
+    <div id="e-m" class="msg"></div>
+  </div>
+
+  <div id="rel" style="display:none"></div>
+  <button class="b" id="pr" style="display:none;margin-top:8px" onclick="doPrint('rel')">Imprimir o guardar PDF de Relación</button>
+</section>
+
+<!-- PESTAÑA 4: COSTO Y VIABILIDAD -->
+<section class="pn" id="p4">
+  <div class="cd">
+    <h2>Inversión inicial requerida (CAPEX · precios cotizados en México en MXN, IVA incluido en hardware)</h2>
+    <p class="s">Dimensionamiento para nave de 4,000 m² (100×40 m) con racks metálicos de 6 m, 4 andenes de recibo y 3 de embarque. Valores editables y persistentes.</p>
+    <div class="tw"><table id="c-t"></table></div>
+    <p class="s" style="margin-top:8px;margin-bottom:0">Fuentes de referencia en México (nov 2026): TP-Link EAP650-Outdoor ($3,585 MXN, Seguridad Total / TechStore MX), Ubiquiti USW-24-POE ($10,920 MXN, Tienda Ubiquiti MX), Zebra TC22 ($17,849 MXN, Mercado Libre / Intercompras), Base Zebra CRD-TC2L-BS1CO ($2,479 MXN, Intercompras), Brother DCP-L2540DW ($4,399 MXN, OfficeMax / Office Depot).</p>
+  </div>
+
+  <div class="cd">
+    <h2>Costos recurrentes (OPEX), ahorro estimado y retorno de inversión</h2>
+    <div class="row" style="margin-bottom:10px">
+      <button class="b g sm" onclick="setEscenario('cons')">Escenario Conservador (recomendado jurado)</button>
+      <button class="b g sm" onclick="setEscenario('base')">Escenario Base</button>
+      <button class="b g sm" onclick="setEscenario('opt')">Escenario Optimista</button>
+    </div>
+    <div class="row" id="c-p"></div>
+    <div class="kp" id="c-k" style="margin-top:12px"></div>
+    <div class="tw"><table id="c-r"></table></div>
+  </div>
+
+  <div class="cd">
+    <h2>Impacto operativo esperado (Antes vs. Después de CEDIS Flow)</h2>
+    <div class="tw">
+      <table>
+        <tr><th>Indicador operativo</th><th>Situación actual (sin sistema)</th><th>Con CEDIS Flow</th></tr>
+        <tr><td>Arribo de proveedores (35 camiones/día)</td><td>Llegadas sin cita; filas y saturación de 4 andenes</td><td>Agenda por hora + filtro en caseta (máx. 40 h/día controladas)</td></tr>
+        <tr><td>Identificación de bultos</td><td>Etiquetado heterogéneo o manual</td><td>Etiqueta QR estandarizada por bulto desde origen (1 producto/bulto)</td></tr>
+        <tr><td>Detección de faltantes y excedentes</td><td>Al acomodar o días después en inventario</td><td>Bloqueo inmediato en andén al escanear cada bulto</td></tr>
+        <tr><td>Control de racks (32 sucursales × 32 tarimas)</td><td>Acomodo empírico y riesgo de desborde</td><td>Asignación automática por sucursal con alerta de capacidad</td></tr>
+        <tr><td>Factor de llenado en embarques (20 tortones/día)</td><td>Salidas con camiones a medio llenar (&lt; 75 %)</td><td>Candado operativo ≥ 90 % de capacidad + Relación con QR</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+<div id="pl"></div>
+
+<script>
+/* ==========================================================================
+   1. GENERADOR QR 100% AUTOCONTENIDO (SVG VECTORIAL, SIN DEPENDENCIA DE RED)
+   Soporta modo Byte (UTF-8), Versiones 1 a 9, Corrección de Errores Nivel L
+   ========================================================================== */
+const QR_SVG = (() => {
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  for (let i = 0, x = 1; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+
+  const V_DATA = [0, 19, 34, 55, 80, 108, 136, 156, 194, 232];
+  const V_BLOCKS = [null, [1,19,7], [1,34,10], [1,55,15], [1,80,20], [1,108,26], [2,68,18], [2,78,20], [2,97,24], [2,116,30]];
+  const ALIGN = [[], [], [6,18], [6,22], [6,26], [6,30], [6,34], [6,22,38], [6,24,42], [6,26,46]];
+
+  function rsGen(n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) {
+      const ng = new Array(g.length + 1).fill(0);
+      for (let j = 0; j < g.length; j++) {
+        ng[j] ^= g[j];
+        if (g[j]) ng[j + 1] ^= EXP[LOG[g[j]] + i];
+      }
+      g = ng;
+    }
+    return g;
+  }
+
+  function rsRem(data, ecLen) {
+    const g = rsGen(ecLen), rem = new Uint8Array(data.length + ecLen);
+    rem.set(data);
+    for (let i = 0; i < data.length; i++) {
+      const c = rem[i];
+      if (c) for (let j = 0; j < g.length; j++) if (g[j]) rem[i + j] ^= EXP[LOG[c] + LOG[g[j]]];
+    }
+    return rem.slice(data.length);
+  }
+
+  function fmtBits(mask) {
+    const d = (1 << 3) | mask;
+    let r = d << 10;
+    for (let i = 14; i >= 10; i--) if ((r >> i) & 1) r ^= 0x537 << (i - 10);
+    return ((d << 10) | r) ^ 0x5412;
+  }
+
+  function verBits(v) {
+    let r = v << 12;
+    for (let i = 17; i >= 12; i--) if ((r >> i) & 1) r ^= 0x1f25 << (i - 12);
+    return (v << 12) | r;
+  }
+
+  function encode(text, px = 148) {
+    const bytes = new TextEncoder().encode(String(text));
+    const needCw = Math.ceil((12 + bytes.length * 8) / 8);
+    let v = 1;
+    while (v <= 9 && V_DATA[v] < needCw) v++;
+    if (v > 9) throw new Error('QR demasiado largo');
+
+    const bits = [];
+    const push = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    push(0b0100, 4);
+    push(bytes.length, 8);
+    for (const b of bytes) push(b, 8);
+    const capBits = V_DATA[v] * 8;
+    push(0, Math.min(4, capBits - bits.length));
+    while (bits.length % 8) bits.push(0);
+    const dataCw = new Uint8Array(V_DATA[v]);
+    for (let i = 0; i < bits.length / 8; i++) {
+      let val = 0;
+      for (let b = 0; b < 8; b++) val = (val << 1) | bits[i * 8 + b];
+      dataCw[i] = val;
+    }
+    for (let i = bits.length / 8, p = 0; i < V_DATA[v]; i++, p ^= 1) dataCw[i] = p ? 0x11 : 0xec;
+
+    const [nb, bLen, ecLen] = V_BLOCKS[v];
+    const dBlocks = [], eBlocks = [];
+    for (let b = 0; b < nb; b++) {
+      const slice = dataCw.slice(b * bLen, (b + 1) * bLen);
+      dBlocks.push(slice);
+      eBlocks.push(rsRem(slice, ecLen));
+    }
+    const stream = [];
+    for (let i = 0; i < bLen; i++) for (let b = 0; b < nb; b++) stream.push(dBlocks[b][i]);
+    for (let i = 0; i < ecLen; i++) for (let b = 0; b < nb; b++) stream.push(eBlocks[b][i]);
+
+    const sz = 17 + 4 * v;
+    const mod = Array.from({ length: sz }, () => new Uint8Array(sz));
+    const fn = Array.from({ length: sz }, () => new Uint8Array(sz));
+    const setFn = (r, c, val) => { if (r >= 0 && r < sz && c >= 0 && c < sz) { mod[r][c] = val ? 1 : 0; fn[r][c] = 1; } };
+
+    const finder = (r0, c0) => {
+      for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+        const on = r >= 0 && r <= 6 && c >= 0 && c <= 6 && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+        setFn(r0 + r, c0 + c, on);
+      }
+    };
+    finder(0, 0); finder(0, sz - 7); finder(sz - 7, 0);
+
+    const al = ALIGN[v];
+    for (const r0 of al) for (const c0 of al) {
+      if ((r0 <= 8 && c0 <= 8) || (r0 <= 8 && c0 >= sz - 9) || (r0 >= sz - 9 && c0 <= 8)) continue;
+      for (let r = -2; r <= 2; r++) for (let c = -2; c <= 2; c++) {
+        setFn(r0 + r, c0 + c, Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0));
+      }
+    }
+
+    for (let i = 8; i < sz - 8; i++) { setFn(6, i, i % 2 === 0); setFn(i, 6, i % 2 === 0); }
+    setFn(sz - 8, 8, 1);
+
+    for (let i = 0; i < 9; i++) { if (i === 6) continue; setFn(8, i, 0); setFn(i, 8, 0); }
+    for (let i = 0; i < 8; i++) { setFn(8, sz - 1 - i, 0); if (i < 7) setFn(sz - 1 - i, 8, 0); }
+
+    if (v >= 7) {
+      const vb = verBits(v);
+      for (let i = 0; i < 18; i++) {
+        const bit = (vb >> i) & 1;
+        setFn(Math.floor(i / 3), sz - 11 + (i % 3), bit);
+        setFn(sz - 11 + (i % 3), Math.floor(i / 3), bit);
+      }
+    }
+
+    let bitIdx = 0, dir = -1;
+    for (let col = sz - 1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      for (let step = 0; step < sz; step++) {
+        const r = dir === -1 ? sz - 1 - step : step;
+        for (let dc = 0; dc < 2; dc++) {
+          const c = col - dc;
+          if (!fn[r][c]) {
+            const cw = stream[bitIdx >> 3] || 0;
+            mod[r][c] = (cw >> (7 - (bitIdx & 7))) & 1;
+            bitIdx++;
+          }
+        }
+      }
+      dir *= -1;
+    }
+
+    const maskFn = [
+      (r, c) => (r + c) % 2 === 0,
+      (r, c) => r % 2 === 0,
+      (r, c) => c % 3 === 0,
+      (r, c) => (r + c) % 3 === 0,
+      (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
+      (r, c) => ((r * c) % 2 + (r * c) % 3) === 0,
+      (r, c) => (((r * c) % 2 + (r * c) % 3) % 2) === 0,
+      (r, c) => (((r + c) % 2 + (r * c) % 3) % 2) === 0
+    ];
+
+    let bestScore = Infinity, bestGrid = null;
+    for (let m = 0; m < 8; m++) {
+      const g = mod.map((row, r) => row.map((val, c) => fn[r][c] ? val : (val ^ (maskFn[m](r, c) ? 1 : 0))));
+      const fb = fmtBits(m);
+      for (let i = 0; i < 6; i++) g[8][i] = (fb >> (14 - i)) & 1;
+      g[8][7] = (fb >> 8) & 1; g[8][8] = (fb >> 7) & 1; g[7][8] = (fb >> 6) & 1;
+      for (let i = 9; i < 15; i++) g[14 - i][8] = (fb >> (14 - i)) & 1;
+      for (let i = 0; i < 7; i++) g[sz - 1 - i][8] = (fb >> (14 - i)) & 1;
+      for (let i = 7; i < 15; i++) g[8][sz - 15 + i] = (fb >> (14 - i)) & 1;
+
+      let score = 0;
+      for (let r = 0; r < sz; r++) {
+        let run = 1;
+        for (let c = 1; c < sz; c++) {
+          if (g[r][c] === g[r][c - 1]) { run++; if (run === 5) score += 3; else if (run > 5) score++; }
+          else run = 1;
+        }
+      }
+      for (let c = 0; c < sz; c++) {
+        let run = 1;
+        for (let r = 1; r < sz; r++) {
+          if (g[r][c] === g[r - 1][c]) { run++; if (run === 5) score += 3; else if (run > 5) score++; }
+          else run = 1;
+        }
+      }
+      if (score < bestScore) { bestScore = score; bestGrid = g; }
+    }
+
+    let path = '';
+    for (let r = 0; r < sz; r++) for (let c = 0; c < sz; c++) if (bestGrid[r][c]) path += `M${c} ${r}h1v1h-1z`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 ${sz + 8} ${sz + 8}" width="${px}" height="${px}" shape-rendering="crispEdges"><rect x="-4" y="-4" width="${sz + 8}" height="${sz + 8}" fill="#fff"/><path d="${path}" fill="#000"/></svg>`;
+  }
+
+  return { encode };
+})();
+
+/* ==========================================================================
+   2. ESTADO, PERSISTENCIA Y REGLAS DE OPERACIÓN DEL CEDIS
+   ========================================================================== */
+const $ = s => document.querySelector(s),
+      M = n => '$' + Math.round(n).toLocaleString('es-MX'),
+      sum = (a, k) => a.reduce((t, x) => t + x[k], 0),
+      esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const TAR_V = 1.12 * 1.15 * 1.85 * 0.8;
+const CV = 12 * TAR_V;
+const TABS = ['1. Agendar y Caseta', '2. Factura y QR', '3. Recepción', '4. Almacén y Embarque', '5. Costo y Viabilidad'];
+
+const S = { citas: [], ocs: {}, rec: {}, log: [], emb: [], verif: {} };
+let seq = 0, camStream = null, camTimer = null;
+
+const COT = [
+  ['Red', 'AP industrial Wi-Fi 6 IP67 (TP-Link EAP650-Outdoor, cobertura 4,000 m²)', 10, 3585],
+  ['Red', 'Switch PoE+ 24 puertos administrable (Ubiquiti USW-24-POE)', 2, 10920],
+  ['Red', 'Cableado estructurado, canalización y puesta en marcha (lote est.)', 1, 35000],
+  ['Captura', 'Handheld Android rudo 2D, caída 1.5 m (Zebra TC22 6GB/64GB)', 8, 17849],
+  ['Captura', 'Base de carga para terminal móvil (Zebra CRD-TC2L-BS1CO)', 4, 2479],
+  ['Impresión', 'Impresora láser en red para Relaciones de Embarque (Brother DCP-L2540DW)', 3, 4399],
+  ['Servicio', 'Implementación, configuración MDM y capacitación operativa (lote est.)', 1, 45000]
+];
+const P = { emb: 20, pag: 3, dias: 26, viaje: 3500, red: 5, err: 12000 };
+
+function saveState() {
+  try {
+    const ser = {
+      citas: S.citas, ocs: S.ocs, emb: S.emb, log: S.log, verif: S.verif, seq,
+      rec: Object.fromEntries(Object.entries(S.rec).map(([k, v]) => [k, [...v]])),
+      cot: COT.map(c => [c[2], c[3]]),
+      p: { ...P }
+    };
+    localStorage.setItem('cedis_flow_v4', JSON.stringify(ser));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('cedis_flow_v4') || localStorage.getItem('cedis_flow_v3');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    S.citas = d.citas || [];
+    S.ocs = d.ocs || {};
+    S.emb = d.emb || [];
+    S.log = d.log || [];
+    S.verif = d.verif || {};
+    seq = d.seq || 0;
+    S.rec = Object.fromEntries(Object.entries(d.rec || {}).map(([k, v]) => [k, new Set(v)]));
+    if (Array.isArray(d.cot)) d.cot.forEach((v, i) => { if (COT[i] && Array.isArray(v)) { COT[i][2] = +v[0]; COT[i][3] = +v[1]; } });
+    if (d.p && typeof d.p === 'object') Object.assign(P, d.p);
+  } catch (e) {}
+}
+
+function resetAll() {
+  localStorage.removeItem('cedis_flow_v4');
+  localStorage.removeItem('cedis_flow_v3');
+  location.reload();
+}
+
+function doPrint(m) {
+  document.body.classList.add('pt-' + m);
+  window.print();
+}
+window.addEventListener('afterprint', () => document.body.classList.remove('pt-rel', 'pt-lb'));
+
+function go(i) {
+  if (i !== 2) stopCam();
+  document.querySelectorAll('.pn').forEach((p, j) => p.classList.toggle('on', i === j));
+  document.querySelectorAll('#nv button').forEach((b, j) => b.classList.toggle('on', i === j));
+  render();
+}
+
+$('#nv').innerHTML = TABS.map((t, i) => `<button onclick="go(${i})">${t}</button>`).join('');
+$('#a-a').innerHTML = [1, 2, 3, 4].map(a => `<option value="${a}">Andén ${a}</option>`).join('');
+const HORAS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(h => `<option value="${h}">${h}:00</option>`).join('');
+$('#a-i').innerHTML = HORAS;
+$('#g-h').innerHTML = HORAS;
+
+/* --- MÓDULO 1: AGENDAMIENTO Y CONTROL DE CASETA --- */
+function addCita(c) {
+  if (!c.prov || !c.oc || !c.fol) return 'Completa proveedor, OC y folio de factura.';
+  const ocNorm = c.oc.toLowerCase(), folNorm = c.fol.toLowerCase();
+  if (Object.keys(S.ocs).some(k => k.toLowerCase() === ocNorm)) return 'Esa OC ya está agendada.';
+  if (S.citas.some(x => x.fol.toLowerCase() === folNorm)) return 'El folio de factura ya existe y no se puede repetir (Regla 2).';
+  if (!Number.isInteger(c.dur) || c.dur < 1 || c.ini + c.dur > 18) return 'La cita dura mínimo 1 h completa y debe terminar a las 18:00 o antes (Regla 1).';
+  if (S.citas.some(x => x.and === c.and && c.ini < x.ini + x.dur && x.ini < c.ini + c.dur)) return 'Ese andén ya tiene una entrega en ese horario (Regla 1).';
+  const item = { ...c, enPatio: false };
+  S.citas.push(item);
+  S.ocs[c.oc] = { ...item, bultos: [] };
+  return null;
+}
+
+function uiCita() {
+  const e = addCita({
+    prov: $('#a-p').value.trim(),
+    oc: $('#a-o').value.trim(),
+    fol: $('#a-f').value.trim(),
+    and: +$('#a-a').value,
+    ini: +$('#a-i').value,
+    dur: +$('#a-d').value
+  });
+  $('#a-m').className = 'msg ' + (e ? 'er' : 'ok');
+  $('#a-m').textContent = e || 'Cita agendada correctamente.';
+  render();
+}
+
+function uiGate() {
+  const q = $('#g-o').value.trim(), h = +$('#g-h').value, box = $('#g-m');
+  if (!q) { box.innerHTML = '<div class="box-er">Ingresa el número de Orden de Compra o folio de factura de la unidad.</div>'; return; }
+  const qNorm = q.toLowerCase();
+  const c = S.citas.find(x => x.oc.toLowerCase() === qNorm || x.fol.toLowerCase() === qNorm);
+  if (!c) {
+    box.innerHTML = `<div class="box-er"><b>ACCESO RECHAZADO EN CASETA:</b> La referencia <b>${esc(q)}</b> no tiene cita programada. Se impide ingreso para evitar cuello de botella en patio.</div>`;
+    return;
+  }
+  if (h < c.ini || h >= c.ini + c.dur) {
+    box.innerHTML = `<div class="box-er"><b>FUERA DE VENTANA HORARIA:</b> La <b>${esc(c.oc)}</b> (${esc(c.prov)}) tiene cita de <b>${c.ini}:00 a ${c.ini + c.dur}:00</b> en el <b>Andén ${c.and}</b>. Debe esperar o reagendar.</div>`;
+    return;
+  }
+  c.enPatio = true;
+  if (S.ocs[c.oc]) S.ocs[c.oc].enPatio = true;
+  box.innerHTML = `<div class="box-ok"><b>ACCESO AUTORIZADO:</b> Unidad de <b>${esc(c.prov)}</b> (${esc(c.oc)}, Factura ${esc(c.fol)}) asignada al <b>Andén de recibo ${c.and}</b>.</div>`;
+  render();
+}
+
+function demoSinCita() {
+  $('#g-o').value = 'OC-SIN-CITA-99';
+  uiGate();
+}
+
+function rAg() {
+  const g = $('#a-g');
+  let h = '<div class="h">Andén / Hora</div>' + [8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(x => `<div class="h">${x}:00</div>`).join('');
+  for (let a = 1; a <= 4; a++) {
+    h += `<div class="h">Andén ${a}</div>`;
+    for (let x = 8; x < 18; x++) {
+      const c = S.citas.find(c => c.and === a && x >= c.ini && x < c.ini + c.dur);
+      h += c ? `<div class="o ${c.enPatio ? 'in' : ''}" title="${esc(c.prov)} (${c.enPatio ? 'En andén' : 'Agendada'})">${esc(c.oc)}</div>` : '<div></div>';
+    }
+  }
+  g.innerHTML = h;
+  const u = sum(S.citas, 'dur');
+  $('#a-k').innerHTML = `<div><b>${S.citas.length}</b>citas agendadas</div><div><b>${u} / 40 h</b>capacidad usada</div><div><b>${(u / 40 * 100).toFixed(0)} %</b>utilización andenes</div><div><b>35 camiones/día</b>requieren ≥ 35 h de 40 h</div>`;
+}
+
+/* --- MÓDULO 2: FACTURA POR BULTO Y ETIQUETAS QR --- */
+function addBulto(oc, b) {
+  const o = S.ocs[oc];
+  b.id = `B-${oc}-${String(++seq).padStart(4, '0')}`;
+  b.oc = oc;
+  o.bultos.push(b);
+  return b;
+}
+
+const payload = b => JSON.stringify({ b: b.id, oc: b.oc, p: S.ocs[b.oc].prov, s: b.suc, sku: b.sku, n: b.n });
+
+function uiBul() {
+  const oc = $('#b-o').value;
+  if (!oc) { $('#b-m').className = 'msg er'; $('#b-m').textContent = 'Agenda primero una OC.'; return; }
+  const suc = +$('#b-u').value, sku = $('#b-s').value.trim(), prod = $('#b-r').value.trim();
+  const n = +$('#b-n').value, kg = +$('#b-k').value, m3 = +$('#b-v').value, q = +$('#b-q').value;
+
+  if (!sku || !prod || !Number.isInteger(suc) || suc < 1 || suc > 32 || !Number.isInteger(n) || n < 1 || !(kg > 0) || !(m3 > 0) || !Number.isInteger(q) || q < 1 || q > 200) {
+    $('#b-m').className = 'msg er';
+    $('#b-m').textContent = 'Verifica sucursal (1-32), SKU, producto, piezas, peso (>0), volumen (>0) y cantidad (1-200).';
+    return;
+  }
+  if (kg > 1000 || m3 > TAR_V) {
+    $('#b-m').className = 'msg er';
+    $('#b-m').textContent = `Un bulto no puede exceder la capacidad de 1 tarima (1,000 kg o ${TAR_V.toFixed(2)} m³).`;
+    return;
+  }
+  const o = S.ocs[oc];
+  const conflicto = o.bultos.find(x => x.sku === sku && x.prod.toLowerCase() !== prod.toLowerCase());
+  if (conflicto) {
+    $('#b-m').className = 'msg er';
+    $('#b-m').textContent = `El SKU ${sku} ya está registrado en esta factura como "${conflicto.prod}". No mezcles productos (Regla 3).`;
+    return;
+  }
+  for (let i = 0; i < q; i++) addBulto(oc, { sku, prod, suc, n, kg, m3 });
+  $('#b-m').className = 'msg ok';
+  $('#b-m').textContent = `${q} bulto(s) agregado(s) a ${oc}.`;
+  render();
+}
+
+function mkLabel(b, o) {
+  const d = document.createElement('div');
+  d.className = 'lbl';
+  const q = document.createElement('div');
+  q.className = 'q';
+  try { q.innerHTML = QR_SVG.encode(payload(b), 124); } catch (e) { q.textContent = 'QR'; }
+  d.appendChild(q);
+  const t = document.createElement('div');
+  t.innerHTML = `<b>${esc(b.id)}</b><br>OC: ${esc(b.oc)} · Fact: ${esc(o.fol)}<br>${esc(o.prov)}<br><b>Sucursal destino: ${b.suc}</b><br>${esc(b.sku)} · ${esc(b.prod)} (${b.n} pzas)`;
+  d.appendChild(t);
+  return d;
+}
+
+function rBul() {
+  const oc = $('#b-o').value, o = S.ocs[oc], box = $('#b-l');
+  box.innerHTML = '';
+  if (!o) { $('#b-t').textContent = ''; return; }
+  o.bultos.slice(-12).forEach(b => box.appendChild(mkLabel(b, o)));
+  $('#b-t').textContent = o.bultos.length
+    ? `${o.bultos.length} bultos en factura ${o.fol} · ${sum(o.bultos, 'kg').toFixed(0)} kg · ${sum(o.bultos, 'm3').toFixed(2)} m³` + (o.bultos.length > 12 ? ' (mostrando últimos 12; "Imprimir etiquetas" incluye todos)' : '')
+    : 'Aún no hay bultos registrados en esta OC.';
+}
+
+function printLabels() {
+  const o = S.ocs[$('#b-o').value], pl = $('#pl');
+  if (!o || !o.bultos.length) { $('#b-m').className = 'msg er'; $('#b-m').textContent = 'No hay bultos para imprimir.'; return; }
+  pl.innerHTML = '';
+  o.bultos.forEach(b => pl.appendChild(mkLabel(b, o)));
+  doPrint('lb');
+}
+
+/* --- MÓDULO 3: RECEPCIÓN Y ESCANEO --- */
+function scan(raw, oc) {
+  const o = S.ocs[oc];
+  let d;
+  try { d = JSON.parse(raw); } catch { d = null; }
+  if (!d || typeof d !== 'object') d = { b: raw.trim() };
+  const r = S.rec[oc] ??= new Set();
+  const bIdNorm = String(d.b || '').trim().toLowerCase();
+  const b = o.bultos.find(x => x.id.toLowerCase() === bIdNorm);
+  let x;
+  if ((d.oc && d.oc !== oc) || !b) x = ['er', 'RECHAZADO: Mercancía no solicitada en esta OC (Regla 5)', d.b || raw];
+  else if (r.has(b.id)) x = ['er', 'RECHAZADO: Excedente, este bulto ya fue escaneado y recibido (Regla 5)', b.id];
+  else if ((d.sku && d.sku !== b.sku) || (d.n && d.n !== b.n) || (d.s && d.s !== b.suc)) x = ['er', 'RECHAZADO: Discrepancia con datos de factura', b.id];
+  else { r.add(b.id); x = ['ok', `RECIBIDO → Asignado a Rack Sucursal ${b.suc} (${b.sku}, ${b.n} pzas)`, b.id]; }
+  x.push(oc);
+  S.log.unshift(x);
+}
+
+function uiScan() {
+  const oc = $('#r-o').value, v = $('#r-i').value.trim();
+  if (!oc || !v) return;
+  scan(v, oc);
+  $('#r-i').value = '';
+  render();
+}
+
+function demoScan() {
+  const oc = $('#r-o').value, o = S.ocs[oc], r = S.rec[oc] || new Set();
+  const b = o && o.bultos.find(x => !r.has(x.id));
+  if (b) { scan(payload(b), oc); render(); }
+}
+
+function demoExcedente() {
+  const oc = $('#r-o').value, o = S.ocs[oc], r = S.rec[oc] || new Set();
+  const b = o && o.bultos.find(x => r.has(x.id));
+  if (b) { scan(payload(b), oc); render(); }
+  else if (o && o.bultos[0]) { scan(payload(o.bultos[0]), oc); scan(payload(o.bultos[0]), oc); render(); }
+}
+
+function demoIntruso() {
+  const oc = $('#r-o').value, o = S.ocs[oc];
+  if (!o) return;
+  scan(JSON.stringify({ b: 'B-INTRUSO-999', oc, p: o.prov, s: 1, sku: 'SKU-NO-PEDIDO', n: 10 }), oc);
+  render();
+}
+
+function recTodo() {
+  const oc = $('#r-o').value, o = S.ocs[oc];
+  if (!o) return;
+  o.bultos.forEach(b => { if (!(S.rec[oc] || new Set()).has(b.id)) scan(payload(b), oc); });
+  render();
+}
+
+async function toggleCam() {
+  const box = $('#cam-box'), st = $('#cam-s');
+  if (camStream) { stopCam(); return; }
+  if (!('BarcodeDetector' in window) || !navigator.mediaDevices) {
+    box.style.display = 'flex';
+    st.textContent = 'Tu navegador no soporta escaneo directo por cámara; usa el campo de texto o los botones de simulación.';
+    return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const v = $('#cam-v');
+    v.srcObject = camStream;
+    await v.play();
+    box.style.display = 'flex';
+    st.textContent = 'Escaneando QR en vivo...';
+    const det = new BarcodeDetector({ formats: ['qr_code'] });
+    camTimer = setInterval(async () => {
+      try {
+        const codes = await det.detect(v);
+        if (codes.length && codes[0].rawValue) {
+          const oc = $('#r-o').value;
+          if (oc) { scan(codes[0].rawValue, oc); render(); st.textContent = 'Último QR leído: ' + new Date().toLocaleTimeString(); }
+        }
+      } catch (e) {}
+    }, 650);
+  } catch (e) {
+    box.style.display = 'flex';
+    st.textContent = 'No se pudo acceder a la cámara: ' + e.message;
+  }
+}
+
+function stopCam() {
+  if (camTimer) { clearInterval(camTimer); camTimer = null; }
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  $('#cam-box').style.display = 'none';
+}
+
+function rRec() {
+  const oc = $('#r-o').value, o = S.ocs[oc];
+  if (!o) { $('#r-k').innerHTML = ''; $('#log').innerHTML = ''; return; }
+  const n = (S.rec[oc] || new Set()).size, t = o.bultos.length;
+  $('#r-k').innerHTML = `<div><b>${t}</b>bultos en factura</div><div><b>${n}</b>recibidos OK</div><div><b>${t - n}</b>faltantes</div><div><b>${S.log.filter(l => l[3] === oc && l[0] === 'er').length}</b>rechazos</div>`;
+  $('#log').innerHTML = S.log.filter(l => l[3] === oc).slice(0, 60).map(l => `<div class="${l[0]}">${esc(l[2])} · ${esc(l[1])}</div>`).join('');
+}
+
+/* --- MÓDULO 4: ALMACENAMIENTO Y EMBARQUE --- */
+function stock() {
+  const m = {};
+  Object.values(S.ocs).forEach(o => o.bultos.forEach(b => {
+    if ((S.rec[o.oc] || new Set()).has(b.id) && !b.sent) (m[b.suc] ??= []).push(b);
+  }));
+  return m;
+}
+
+const fill = bs => Math.max(sum(bs, 'm3') / CV, sum(bs, 'kg') / 12000);
+const tar = bs => Math.max(Math.ceil(sum(bs, 'm3') / TAR_V - 1e-9), Math.ceil(sum(bs, 'kg') / 1000));
+
+function setVerif(s, val) {
+  S.verif[s] = val;
+  render();
+}
+
+function rEmb() {
+  const m = stock();
+  let rkHtml = '';
+  for (let s = 1; s <= 32; s++) {
+    const bs = m[s] || [], tt = bs.length ? tar(bs) : 0, f = bs.length ? fill(bs) : 0;
+    const cls = tt > 32 ? 'rk ov' : f >= 0.9 ? 'rk rdy' : tt > 0 ? 'rk has' : 'rk';
+    rkHtml += `<div class="${cls}" title="Sucursal ${s}: ${tt}/32 tarimas (${(f * 100).toFixed(0)}% tortón)">Suc ${s}<br>${tt}/32</div>`;
+  }
+  $('#rk-grid').innerHTML = rkHtml;
+
+  const ks = Object.keys(m).sort((a, b) => a - b);
+  $('#e-t').innerHTML = '<tr><th>Sucursal</th><th class="n">Bultos</th><th class="n">Tarimas</th><th class="n">Peso kg</th><th class="n">Vol. m³</th><th>Llenado tortón</th><th>Estiba y film (Regla 6)</th><th></th></tr>' +
+    (ks.length ? ks.map(s => {
+      const bs = m[s], f = fill(bs), okCap = f >= 0.9, tt = tar(bs), chk = !!S.verif[s];
+      return `<tr>
+        <td><b>Rack ${s}</b></td>
+        <td class="n">${bs.length}</td>
+        <td class="n ${tt > 32 ? 'er' : ''}">${tt} / 32${tt > 32 ? ' ¡EXCEDIDO!' : ''}</td>
+        <td class="n">${sum(bs, 'kg').toFixed(0)}</td>
+        <td class="n">${sum(bs, 'm3').toFixed(2)}</td>
+        <td><div class="bar"><i class="${okCap ? 'f' : ''}" style="width:${Math.min(100, f * 100)}%"></i></div>${(f * 100).toFixed(1)} %</td>
+        <td><label class="chk"><input type="checkbox" ${chk ? 'checked' : ''} onchange="setVerif(${s},this.checked)"> Base, ≤1.85m y film</label></td>
+        <td><button class="b sm" ${(okCap && chk) ? '' : 'disabled'} onclick="embarcar(${s})">Embarcar</button></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="8">Aún no hay mercancía recibida en racks.</td></tr>');
+}
+
+function embarcar(s) {
+  if (!S.verif[s]) {
+    $('#e-m').className = 'msg er';
+    $('#e-m').textContent = 'Debes confirmar la verificación física de tarima (base 1.12×1.15 m, altura ≤ 1.85 m y film de seguridad, Regla 6).';
+    return;
+  }
+  const bs = stock()[s] || [];
+  let take = [], kg = 0, m3 = 0;
+  bs.forEach(b => {
+    if ((kg + b.kg) / 12000 <= 1 && (m3 + b.m3) / CV <= 1) {
+      take.push(b); kg += b.kg; m3 += b.m3;
+    }
+  });
+  if (take.length < 1 || Math.max(kg / 12000, m3 / CV) < 0.9) {
+    $('#e-m').className = 'msg er';
+    $('#e-m').textContent = 'Con bultos enteros que caben en el tortón el llenado queda debajo de 90 % (Regla 7).';
+    return;
+  }
+  $('#e-m').textContent = '';
+  take.forEach(b => b.sent = 1);
+  S.verif[s] = false;
+  const andenSal = +$('#e-and').value;
+  const e = { id: 'EMB-' + String(S.emb.length + 1).padStart(3, '0'), suc: s, anden: andenSal, take, kg, m3, fecha: new Date().toLocaleString('es-MX') };
+  S.emb.push(e);
+
+  const g = {};
+  take.forEach(b => {
+    const k = b.oc + '|' + b.sku;
+    (g[k] ??= { oc: b.oc, sku: b.sku, prod: b.prod, bl: 0, pz: 0 }).bl++;
+    g[k].pz += b.n;
+  });
+  const items = Object.values(g);
+  const qrData = JSON.stringify({
+    e: e.id, s, and: andenSal, bultos: take.length, kg: Math.round(kg), m3: +m3.toFixed(2),
+    items: items.map(x => ({ oc: x.oc, sku: x.sku, bl: x.bl, pz: x.pz }))
+  });
+
+  const r = $('#rel');
+  r.style.display = 'block';
+  $('#pr').style.display = 'inline-block';
+  let qrSvg = '', qrNota = '';
+  try { qrSvg = QR_SVG.encode(qrData, 128); } catch (err) {
+    qrNota = '<div style="font-size:10px;max-width:136px">QR resumido (manifiesto largo): detalle en la tabla</div>';
+    qrSvg = QR_SVG.encode(JSON.stringify({ e: e.id, s, and: andenSal, bultos: take.length, kg: Math.round(kg) }), 128);
+  }
+  r.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+    <div>
+      <h2 style="margin:0">Relación de Embarque ${e.id}</h2>
+      <b>Destino:</b> Sucursal ${s} · <b>Andén de salida (norte):</b> ${andenSal}<br>
+      <b>Fecha y hora:</b> ${e.fecha}<br>
+      <b>Consolidación:</b> ${(Math.max(kg / 12000, m3 / CV) * 100).toFixed(1)} % · ${kg.toFixed(0)} kg · ${m3.toFixed(2)} m³ · ${tar(take)} tarimas<br>
+      <b>Control físico:</b> Estiba en base 1.12×1.15 m, altura ≤ 1.85 m y film de seguridad verificados.
+    </div>
+    <div style="background:#fff;padding:4px">${qrSvg}${qrNota}</div>
+  </div>
+  <table style="margin-top:10px">
+    <tr><th>OC</th><th>SKU</th><th>Producto</th><th class="n">Bultos</th><th class="n">Piezas</th></tr>
+    ${items.map(x => `<tr><td>${esc(x.oc)}</td><td>${esc(x.sku)}</td><td>${esc(x.prod)}</td><td class="n">${x.bl}</td><td class="n">${x.pz}</td></tr>`).join('')}
+  </table>`;
+  render();
+  r.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* --- MÓDULO 5: COTIZACIÓN Y VIABILIDAD --- */
+function setEscenario(tipo) {
+  if (tipo === 'cons') { P.red = 5; P.err = 12000; }
+  else if (tipo === 'base') { P.red = 10; P.err = 25000; }
+  else { P.red = 15; P.err = 35000; }
+  rCot();
+  saveState();
+}
+
+function rCot() {
+  const inv = COT.reduce((t, c) => t + c[2] * c[3], 0);
+  $('#c-t').innerHTML = '<tr><th>Rubro</th><th>Concepto</th><th class="n">Cant.</th><th class="n">P. unitario</th><th class="n">Subtotal</th></tr>' +
+    COT.map((c, i) => `<tr><td>${c[0]}</td><td>${c[1]}</td><td class="n"><input type="number" min="0" value="${c[2]}" onchange="COT[${i}][2]=+this.value;rCot();saveState()"></td><td class="n"><input type="number" min="0" value="${c[3]}" onchange="COT[${i}][3]=+this.value;rCot();saveState()"></td><td class="n">${M(c[2] * c[3])}</td></tr>`).join('') +
+    `<tr><th colspan="4">Inversión inicial total (CAPEX cotizado en MXN)</th><th class="n">${M(inv)}</th></tr>`;
+
+  $('#c-p').innerHTML = [
+    ['emb', 'Embarques/día'],
+    ['pag', 'Páginas/relación'],
+    ['dias', 'Días/mes'],
+    ['viaje', 'Costo viaje MXN'],
+    ['red', 'Viajes evitados %'],
+    ['err', 'Ahorro errores/mes']
+  ].map(([k, t]) => `<label>${t}<input type="number" min="0" value="${P[k]}" onchange="P.${k}=+this.value;rCot();saveState()"></label>`).join('');
+
+  const hojas = P.emb * P.pag * P.dias,
+        papel = hojas / 500 * 99,
+        toner = hojas / 2600 * 1499,
+        eq = COT.slice(0, 6).reduce((t, c) => t + c[2] * c[3], 0) * 0.1 / 12,
+        nube = 1800,
+        sop = 1500,
+        rec = papel + toner + eq + nube + sop,
+        ah = P.emb * P.dias * P.red / 100 * P.viaje + P.err,
+        neto = ah - rec;
+
+  $('#c-r').innerHTML = `<tr><th>Concepto recurrente mensual (OPEX)</th><th class="n">MXN / mes</th></tr>
+    <tr><td>Papel bond carta 75g (${hojas.toLocaleString('es-MX')} hojas · $99/paq 500)</td><td class="n">${M(papel)}</td></tr>
+    <tr><td>Tóner láser original Brother TN-660 (2,600 págs · $1,499 c/u)</td><td class="n">${M(toner)}</td></tr>
+    <tr><td>Mantenimiento preventivo de hardware (10 % anual)</td><td class="n">${M(eq)}</td></tr>
+    <tr><td>Infraestructura nube y respaldos</td><td class="n">${M(nube)}</td></tr>
+    <tr><td>Soporte y administración MDM de terminales</td><td class="n">${M(sop)}</td></tr>
+    <tr><th>Total recurrente mensual</th><th class="n">${M(rec)}</th></tr>`;
+
+  $('#c-k').innerHTML = `<div><b>${M(inv)}</b>inversión inicial</div><div><b>${M(rec)}</b>costo mensual</div><div><b>${M(ah)}</b>ahorro mensual bruto</div><div><b>${neto > 0 ? (inv / neto).toFixed(1) + ' meses' : 'No recupera'}</b>retorno (ROI)</div>`;
+}
+
+function opts(id, list) {
+  const el = $(id), v = el.value;
+  el.innerHTML = list.map(o => `<option>${esc(o)}</option>`).join('');
+  if (list.includes(v)) el.value = v;
+}
+
+function render() {
+  opts('#b-o', Object.keys(S.ocs));
+  opts('#r-o', Object.keys(S.ocs).filter(k => S.ocs[k].bultos.length));
+  rAg(); rBul(); rRec(); rEmb(); rCot();
+  saveState();
+}
+
+function seed() {
+  if (S.citas.length) {
+    localStorage.removeItem('cedis_flow_v4');
+    localStorage.removeItem('cedis_flow_v3');
+    S.citas = []; S.ocs = {}; S.rec = {}; S.log = []; S.emb = []; S.verif = {}; seq = 0;
+  }
+  [
+    ['Distribuidora Golfo', 'OC-1001', 'F-2001', 1, 8, 2],
+    ['Abarrotes del Puerto', 'OC-1002', 'F-2002', 2, 8, 2],
+    ['Lácteos Jarocho', 'OC-1003', 'F-2003', 3, 9, 1],
+    ['Conservas Veracruz', 'OC-1004', 'F-2004', 4, 10, 2]
+  ].forEach(([prov, oc, fol, and, ini, dur]) => addCita({ prov, oc, fol, and, ini, dur }));
+
+  S.citas[0].enPatio = S.ocs['OC-1001'].enPatio = true;
+  S.citas[1].enPatio = S.ocs['OC-1002'].enPatio = true;
+
+  const mk = (oc, suc, n, sku, prod, kg, m3) => {
+    for (let i = 0; i < n; i++) addBulto(oc, { sku, prod, suc, n: 12, kg, m3 });
+  };
+  mk('OC-1001', 1, 60, 'SKU-100', 'Aceite 1 L', 85, 0.19);
+  mk('OC-1001', 2, 20, 'SKU-110', 'Arroz 1 kg', 40, 0.10);
+  mk('OC-1002', 1, 60, 'SKU-200', 'Refresco 600 ml', 85, 0.19);
+  mk('OC-1002', 3, 20, 'SKU-210', 'Galletas', 20, 0.12);
+  mk('OC-1003', 2, 15, 'SKU-300', 'Yogurt', 30, 0.09);
+  mk('OC-1004', 4, 24, 'SKU-400', 'Atún lata', 35, 0.11);
+  go(0);
+}
+
+loadState();
+go(0);
+</script>
+</body></html>
